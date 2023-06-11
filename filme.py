@@ -9,10 +9,6 @@ class Filme:
         self.duracao = duracao
         self.valor = valor
 
-    def selecionaGeneros(self):
-        genero = input(f'Insira o gênero do filme:\n1 - Romance\n2 - Musical\n3- Documentário\n4- Ação\n5 - Animação\n6 - Drama\n7 - Suspense\n8 = Terror\n9 - Ficcao Cientifica\n10 = Fantasia')
-        print(genero)
-
     def editaTitulo(self):
         self.titulo = input('Insira o novo título: ').title()
         return self.titulo
@@ -34,7 +30,7 @@ class Filme:
         
     def editaValor(self):
         while True:
-            valor = int(input('Insira o novo valor: '))
+            valor = float(input('Insira o novo valor: '))
             if valor >= 0:
                 break
             else:
@@ -63,7 +59,7 @@ class Filme:
             self.atores.remove(self.atores[ator-1])
             
     def editaGenero(self):
-        generosDisponiveis = ("Romance","Musical", "Documentário", "Ação", "Animação", "Drama", "Terror", "Fantasia", "Comédia")
+        generosDisponiveis = ["Romance","Musical", "Documentário", "Ação", "Animação", "Drama", "Terror", "Fantasia", "Comédia"]
         print('GENEROS CADASTRADOS:')
         for i in range(len(self.genero)):
             print(f'{i+1} - {self.genero[i]}')
@@ -105,7 +101,7 @@ class Filme:
         for i in range(len(self.genero)):
             print(self.genero[i], end = '')
             if i != len(self.genero) - 1:
-                print(', ')
+                print(', ', end = '')
             else:
                 print()
         print(f'ATOR(ES):', end = ' ')

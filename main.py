@@ -1,6 +1,6 @@
-from usuario import Usuario, UsuarioAdm, UsuarioPadrao
+from usuario import Usuario, UsuarioAdm, UsuarioPadrao, UsuarioPVIP
 from filme import Filme
-
+import json
 
 def confereOpcao(texto, y, z):
     while True:
@@ -13,7 +13,6 @@ def confereOpcao(texto, y, z):
 
 ### pagina inicial ###
 
-
 def fazLogin():
     user = input('nome de usuario ')
     if user not in usuarios:
@@ -21,7 +20,6 @@ def fazLogin():
         return None
     else:
         return usuarios[user]
-
 
 def criaConta():
     nome = input("insira o nome ").title()
@@ -38,12 +36,15 @@ def criaConta():
     if tipo == 2:
         user = UsuarioAdm(nome, nomeUser, idade, sexo, tipo)
     else:
-        user == UsuarioPadrao(nome, nomeUser, idade, sexo, tipo)
+        vip = confereOpcao('insira o tipo de usuário padrão:\n1 - padrão\n2 - vip ', 1, 2)
+        if vip == 1: 
+            user = UsuarioPadrao(nome, nomeUser, idade, sexo, tipo, 200)
+        else:
+            user = UsuarioPVIP(nome, nomeUser, idade, sexo, tipo, 100)
     usuarios[user.nomeUser] = user
     return user
 
 ### pagina 2 ###
-
 
 def pagina2():
     while True:
@@ -61,16 +62,17 @@ def pagina2():
 
         else:  # padrao
             opcao = confereOpcao(
-                ('\no que deseja fazer?\n1 - procurar filme(s)\n2 - adicionar credito\n0 - voltar '), 0, 2)
+                ('\no que deseja fazer?\n1 - procurar filme(s)\n2 - adicionar credito\n3 - ver listas\n0 - voltar '), 0, 3)
             if opcao == 0:
-                paginaInicial()
+                return False
             elif opcao == 1:
-                procuraFilmesPad()
+                confere = procuraFilmesPad()
+                if confere == False:
+                    continue
             elif opcao == 2:
                 usuarioAtivo.adicionaCredito()
 
-    # edita filme
-
+# edita filme
 
 def editaFilmes():
     while True:
@@ -89,16 +91,14 @@ def editaFilmes():
             if confere == False:
                 continue
 
-
 def removeFilmes():
-    filme = int(input('\nqual filme deseja remover? '))
-    if filmes in filmes:
+    filme = (input('\nqual filme deseja remover? ')).title()
+    if filme in filmes:
         filmes.pop(filme)
         return True
     else:
         print('o filme não está contido na base de dados')
         return False
-
 
 def editaFilmesCat():
     filme = input('\ninsira o nome do filme: ').title()
@@ -132,6 +132,68 @@ def editaFilmesCat():
         print('o filme não está contido na base de dados')
     return True
 
+def adicionaFilmes():
+    print('\nADICIONANDO FILME')
+    titulo = input('título: ').title()
+    anoLancamento = int(input('ano de lançamento: '))
+    diretor = input('diretor: ').title()
+    while True: # duracao
+        duracao = int(input('duração: '))
+        if duracao > 0:
+            break
+        else:
+            print('a duração deve ser maior que 0')
+    while True: # valor
+        valor = float(input('valor: '))
+        if valor > 0:
+            break
+        else:
+            print('o valor deve ser maior que 0')
+    atores = []
+    while True: # atores
+        ator = input('ator: ').title()
+        atores.append(ator)
+        while True:
+            opcao = input('deseja continuar adicionando atores? (S/N) ').upper()
+            if opcao == 'N' or opcao == 'S':
+                break
+        if opcao == 'N':
+            break
+    generos = []
+    numGeneros = 9
+    generosDisponiveis = ["Romance","Musical", "Documentário", "Ação", "Animação", "Drama", "Terror", "Fantasia", "Comédia"]
+    print('gênero: ')
+    for i in range(numGeneros):
+        if i == numGeneros-1:
+            print(f'{i+1} - {generosDisponiveis[i]}', end=' ')
+        else:
+            print(f'{i+1} - {generosDisponiveis[i]}')
+    while True:
+        while True:
+            genero = int(input())
+            if genero >= numGeneros+1 or genero < 1:
+                print('numero invalido')
+                print('gênero:', end = ' ')
+                continue
+            elif 1 <= genero <= numGeneros and generosDisponiveis[genero-1] not in generos:
+                generos.append(generosDisponiveis[genero-1])
+                break
+            elif generosDisponiveis[genero-1] in generos:
+                print('genero já adicionado')
+                print('gênero:', end = ' ')
+                
+        while True:
+            opcao = input('deseja continuar adicionando gêneros? (S/N) ').upper()
+            if opcao == 'N' or opcao == 'S':
+                break
+        if opcao == 'N':
+            break
+        else:
+            print('gênero:', end = ' ')
+
+    filmes[titulo] = (Filme(titulo, anoLancamento, diretor, atores, duracao, generos, valor))
+    print('filme adicionado com sucesso')
+    return False
 
 # procura filme
 
@@ -146,16 +208,76 @@ def procuraFilmesAdm():
             return False
     filmes[filme].mostraInfos()
 
+def procuraFilmesPad():
+    opcao = confereOpcao('deseja procurar por que categoria?\n1 - título\n2 - ator\n3 - década\n4 - gênero\n0 - voltar ', 0, 4)
+    if opcao == 1:
+        procuraFilmesPadTitulo()
+
+def procuraFilmesPadTitulo():
+    statusTrue = '✔'
+    statusFalse = '✖'
+    while True:
+        filme = input('digite o filme de busca: ').title()
+        print(filme)
+        if filme in filmes:
+            break
+        else:
+            print('filme não encontrado')
+            return False
+    filmes[filme].mostraInfos()
+
+    if filme in usuarioAtivo.filmesAssistidos:
+        assistido = statusTrue
+    else:
+        assistido = statusFalse
+
+    if filme in usuarioAtivo.filmesParaAssistir:
+        lista = statusTrue
+        opcoesLista = 'remover filme da lista'
+        acaoLista = usuarioAtivo.removeLista
+    else:
+        lista = statusFalse
+        opcoesLista = 'adicionar filme à lista'
+        acaoLista = usuarioAtivo.adicionaLista
+
+    if filme in usuarioAtivo.assistindoFilme:
+        asistindo = statusTrue
+        opcoesFilme = 'terminar filme'
+        acaoFilme = usuarioAtivo.terminaFilme
+    else:
+        asistindo = statusFalse
+        opcoesFilme = 'comecar filme'
+        acaoFilme = usuarioAtivo.comecaFilme
+
+    print()
+    print(f'assistindo: {asistindo}')
+    print(f'assistidos: {assistido}')
+    print(f'minha lista: {lista}')
+
+    opcao = confereOpcao((f'o que deseja fazer?\n1 - {opcoesFilme}\n2 - {opcoesLista}\n3 - remover do histórico\n0 - voltar '), 0, 3)
+    if opcao == 1:
+        valor = filmes[filme].valor
+        acaoFilme(filmes[filme], filmes[filme].titulo, valor)
+    elif opcao == 2:
+        acaoLista(filmes[filme], filmes[filme].titulo)
+
+    elif opcao == 3:
+        usuarioAtivo.removeHistorico(filmes[filme])
+    elif opcao == 0:
+        return False
+
 ### main ###
 
-
 usuarios = {
-    'mariahh': Usuario('maria', 'mariahh', 18, 'F', 2),
-    'joaozinho': Usuario('joao', 'joaozinho', 23, 'M', 2)
+    'mariahh': UsuarioAdm('maria', 'mariahh', 18, 'F', 2),
+    'joaozinho': UsuarioPadrao('joao', 'joaozinho', 23, 'M', 1, 100),
+    'manug': UsuarioPVIP('emanuelle', 'manug', 19, 'F', 1, {}, {}, {}, 200)
 }
 filmes = {
     'Clueless': Filme('Clueless', 1995, 'Amy Heckerling', ['Paul Rudd', 'Alicia Silverstone'], 97, ['Comédia'], 20),
-    'Orgulho E Preconceito': Filme('Orgulho e Preconceito', 2006, 'Joe Wright', ['Keira Knightley', 'Matthew Macfadyen'], 127, ['Romance'], 15)
+    'Orgulho E Preconceito': Filme('Orgulho e Preconceito', 2006, 'Joe Wright', ['Keira Knightley', 'Matthew Macfadyen'], 127, ['Romance'], 15),
+    'Miss Americana':Filme('Miss Americana', 2020, 'Lana Wilson', ['Taylor Swift'], 85, ['Documentário', 'Musical'], 17),
+    'Forest Gump':Filme('Forest Gump', 1994, 'Robert Zemeckis', ['Tom Hanks', 'Robin Wright'], 142, ['Comédia', 'Drama'], 15)
 }
 
 print("MOVIE TRACKER, o que deseja fazer?")
@@ -163,7 +285,7 @@ flag = True
 while flag == True:
     while True:
         opcao = confereOpcao(
-            "1 - fazer login com conta existente\n2 - criar uma nova conta\n0 - encerrar programa ", 0, 2)
+            "\n1 - fazer login com conta existente\n2 - criar uma nova conta\n0 - encerrar programa ", 0, 2)
         if opcao == 0:
             flag = False
             break

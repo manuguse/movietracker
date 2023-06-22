@@ -71,6 +71,8 @@ def pagina2():
                     continue
             elif opcao == 2:
                 usuarioAtivo.adicionaCredito()
+            elif opcao == 3:
+                usuarioAtivo.verListas()
 
 # edita filme
 
@@ -93,17 +95,23 @@ def editaFilmes():
 
 def removeFilmes():
     filme = (input('\nqual filme deseja remover? ')).title()
-    if filme in filmes:
-        filmes.pop(filme)
-        return True
+    for i in range(len(filmes)):
+        if filme == filmes[i].titulo:
+            filmes.remove(filmes[i])
+            return True
     else:
         print('o filme não está contido na base de dados')
         return False
 
 def editaFilmesCat():
     filme = input('\ninsira o nome do filme: ').title()
-    if filme in filmes:
-        print(filme)
+    for i in range(len(filmes)):
+        if filme == filmes[i].titulo:
+            filme = filmes[i]
+        else: 
+            print('o filme não está contido na base de dados')
+            return False
+
         while True:
             mudar = confereOpcao(
                 (f'Que dado deseja alterar?\n1 - título\n2 - ano de lançamento\n3 - diretor\n4 - genero\n5 - atores\n6 - duração\n7 - valor\n0 - encerrar ediçao '), 0, 7)
@@ -111,25 +119,19 @@ def editaFilmesCat():
                 return False
             else:
                 if mudar == 1:
-                    filmes[filme].editaTitulo()  # feito
-                    tituloo = filmes[filme].titulo
-                    filmes[tituloo] = filmes[filme]
-                    filmes.pop(filme)
-                    filme = tituloo
+                    filme.editaTitulo()  # feito
                 elif mudar == 2:
-                    filmes[filme].editaAno()  # feito
+                    filme.editaAno()  # feito
                 elif mudar == 3:
-                    filmes[filme].editaDiretor()  # feito
+                    filme.editaDiretor()  # feito
                 elif mudar == 4:
-                    filmes[filme].editaGenero()  # feito
+                    filme.editaGenero()  # feito
                 elif mudar == 5:
-                    filmes[filme].editaAtores()  # feito
+                    filme.editaAtores()  # feito
                 elif mudar == 6:
-                    filmes[filme].editaDuracao()  # feito
+                    filme.editaDuracao()  # feito
                 elif mudar == 7:
-                    filmes[filme].editaValor()  # feito
-    else:
-        print('o filme não está contido na base de dados')
+                    filme.editaValor()  # feito
     return True
 
 def adicionaFilmes():
@@ -191,40 +193,42 @@ def adicionaFilmes():
         else:
             print('gênero:', end = ' ')
 
-    filmes[titulo] = (Filme(titulo, anoLancamento, diretor, atores, duracao, generos, valor))
+    filme = (Filme(titulo, anoLancamento, diretor, atores, duracao, generos, valor))
+    filmes.append(filme)
     print('filme adicionado com sucesso')
     return False
 
 # procura filme
 
 def procuraFilmesAdm():
-    while True:
-        filme = input('digite o filme de busca: ').title()
-        print(filme)
-        if filme in filmes:
+    filme = input('digite o filme de busca: ').title()
+    for i in range(len(filmes)):
+        if filme == filmes[i].titulo:
+            filme = filmes[i]
             break
-        else:
-            print('filme não encontrado')
+        else: 
+            print('o filme não está contido na base de dados')
             return False
-    filmes[filme].mostraInfos()
+    filme.mostraInfos()
+    return True
 
 def procuraFilmesPad():
-    opcao = confereOpcao('deseja procurar por que categoria?\n1 - título\n2 - ator\n3 - década\n4 - gênero\n0 - voltar ', 0, 4)
+    opcao = confereOpcao('\ndeseja procurar por que categoria?\n1 - título\n2 - ator\n3 - década\n4 - gênero\n0 - voltar ', 0, 4)
     if opcao == 1:
         procuraFilmesPadTitulo()
 
 def procuraFilmesPadTitulo():
     statusTrue = '✔'
     statusFalse = '✖'
-    while True:
-        filme = input('digite o filme de busca: ').title()
-        print(filme)
-        if filme in filmes:
+    filme = input('digite o filme de busca: ').title()
+    for i in range(len(filmes)):
+        if filme == filmes[i].titulo:
+            filme = filmes[i]
             break
-        else:
-            print('filme não encontrado')
+        else: 
+            print('o filme não está contido na base de dados')
             return False
-    filmes[filme].mostraInfos()
+    filme.mostraInfos()
 
     if filme in usuarioAtivo.filmesAssistidos:
         assistido = statusTrue
@@ -254,31 +258,29 @@ def procuraFilmesPadTitulo():
     print(f'assistidos: {assistido}')
     print(f'minha lista: {lista}')
 
-    opcao = confereOpcao((f'o que deseja fazer?\n1 - {opcoesFilme}\n2 - {opcoesLista}\n3 - remover do histórico\n0 - voltar '), 0, 3)
-    if opcao == 1:
-        valor = filmes[filme].valor
-        acaoFilme(filmes[filme], filmes[filme].titulo, valor)
-    elif opcao == 2:
-        acaoLista(filmes[filme], filmes[filme].titulo)
-
-    elif opcao == 3:
-        usuarioAtivo.removeHistorico(filmes[filme])
-    elif opcao == 0:
+    opcao = confereOpcao((f'o que deseja fazer?\n1 - {opcoesFilme}\n2 - {opcoesLista}\n0 - voltar '), 0, 2)
+    if opcao == 0:
         return False
+    if opcao == 1:
+        valor = filme.valor
+        acaoFilme(filme, filme.titulo, valor)
+    elif opcao == 2:
+        acaoLista(filme, filme.titulo)
+    return True
 
 ### main ###
 
 usuarios = {
     'mariahh': UsuarioAdm('maria', 'mariahh', 18, 'F', 2),
     'joaozinho': UsuarioPadrao('joao', 'joaozinho', 23, 'M', 1, 100),
-    'manug': UsuarioPVIP('emanuelle', 'manug', 19, 'F', 1, {}, {}, {}, 200)
+    'manug': UsuarioPVIP('emanuelle', 'manug', 19, 'F', 1, 200)
 }
-filmes = {
-    'Clueless': Filme('Clueless', 1995, 'Amy Heckerling', ['Paul Rudd', 'Alicia Silverstone'], 97, ['Comédia'], 20),
-    'Orgulho E Preconceito': Filme('Orgulho e Preconceito', 2006, 'Joe Wright', ['Keira Knightley', 'Matthew Macfadyen'], 127, ['Romance'], 15),
-    'Miss Americana':Filme('Miss Americana', 2020, 'Lana Wilson', ['Taylor Swift'], 85, ['Documentário', 'Musical'], 17),
-    'Forest Gump':Filme('Forest Gump', 1994, 'Robert Zemeckis', ['Tom Hanks', 'Robin Wright'], 142, ['Comédia', 'Drama'], 15)
-}
+filmes = (
+    Filme('Clueless', 1995, 'Amy Heckerling', ['Paul Rudd', 'Alicia Silverstone'], 97, ['Comédia'], 20),
+    Filme('Orgulho e Preconceito', 2006, 'Joe Wright', ['Keira Knightley', 'Matthew Macfadyen'], 127, ['Romance'], 15),
+    Filme('Miss Americana', 2020, 'Lana Wilson', ['Taylor Swift'], 85, ['Documentário', 'Musical'], 17),
+    Filme('Forest Gump', 1994, 'Robert Zemeckis', ['Tom Hanks', 'Robin Wright'], 142, ['Comédia', 'Drama'], 15)
+)
 
 print("MOVIE TRACKER, o que deseja fazer?")
 flag = True

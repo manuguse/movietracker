@@ -26,15 +26,20 @@ class UsuarioPadrao(Usuario):
     def __init__(self, nome, nomeUser, idade, sexo, tipo, filmesAssistidos = {}, filmesParaAssistir = {}, assistindoFilme = {}):
         super().__init__(nome, nomeUser, idade, sexo, tipo)
         self.credito = 30
-        self.limiteFilme = 5
         self.filmesParaAssistir = filmesParaAssistir
         self.filmesAssistidos = filmesAssistidos
         self.assistindoFilme = assistindoFilme
 
     def adicionaCredito(self):
-        valor = int(input('Quanto deseja inserir? '))
+        print(f'\nCrédito atual: R${self.credito:.2f}')
+        while True:
+            valor = float(input('Quanto deseja inserir? '))
+            if valor >= 0:
+                break
+            else:
+                print('O valor deve ser positivo')
         self.credito += valor
-        print(f'Crédito total: {self.credito}')
+        print(f'Crédito total: R${self.credito:.2f}')
 
     def removeLista(self, filme, titulo):
         self.filmesParaAssistir.pop(titulo)
@@ -52,8 +57,8 @@ class UsuarioPadrao(Usuario):
     def terminaFilme(self, filme, titulo, valor):
         self.filmesAssistidos[titulo] = filme
         self.assistindoFilme.pop(titulo)
-        self.credito += valor/2
-        print(f'Filme terminado, crédito total: {self.credito:.2f}')
+        self.credito += valor*0.25
+        print(f'Filme terminado, crédito total: R${self.credito:.2f}')
     
     def comecaFilme(self, filme, titulo, valor):
         limiteFilme = 5
@@ -63,9 +68,9 @@ class UsuarioPadrao(Usuario):
             else:
                 self.credito -= valor
                 self.assistindoFilme[titulo] = filme
-                print(f'Tenha um bom filme!\ncrédito total: {self.credito:.2f}')
+                print(f'Tenha um bom filme!\ncrédito total: R${self.credito:.2f}')
         else:
-            print(f'Saldo insuficiente, crédito total: {self.credito:.2f}')
+            print(f'Saldo insuficiente, crédito total: R${self.credito:.2f}')
             opcao = int(input('Deseja adicionar crédito?\n1 - sim\n2 - não '))
             while opcao != 1 and opcao != 2:
                 opcao = int(input('Opção inválida, digite novamente'))
@@ -77,8 +82,6 @@ class UsuarioPadrao(Usuario):
                 if opcao == 1:
                     self.comecaFilme(filme, titulo, valor)
 
-
-            
     def mostraFilmesAssistir(self):
         print('\nFilmes para assistir:')
         if len(self.filmesParaAssistir) == 0:    
@@ -172,13 +175,13 @@ class UsuarioPVIP(UsuarioPadrao):
         if self.credito - valor > 0:
             self.credito -= valor
             self.assistindoFilme[titulo] = filme
-            print(f'Tenha um bom filme!\ncrédito total: {self.credito:.2f}')
+            print(f'Tenha um bom filme!\ncrédito total: R${self.credito:.2f}')
 
         else:
-            print(f'Saldo insuficiente, crédito total: {self.credito:.2f}')
+            print(f'Saldo insuficiente, crédito total: R${self.credito:.2f}')
             
     def terminaFilme(self, filme, titulo, valor):
         self.filmesAssistidos[titulo] = filme
         self.assistindoFilme.pop(titulo)
-        self.credito += valor*0.75
-        print(f'Filme terminado, crédito total: {self.credito:.2f}')
+        self.credito += valor*0.50
+        print(f'Filme terminado, crédito total: R${self.credito:.2f}')

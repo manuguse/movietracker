@@ -9,53 +9,52 @@ def confereOpcao(texto, y, z):
         if (y <= x <= z):
             break
         else:
-            print(f"a opcão deve estar entre {y} e {z} ")
+            print(f"A opcão deve estar entre {y} e {z} ")
     return x
 
 def desejaVerInfo(filmesProcura, cont):
-    print(filmesProcura)
-    opcao = confereOpcao('\ndeseja ver as informações de algum filme?\n1 - sim\n0 - não ', 0, 1)
+    opcao = confereOpcao('\nDeseja ver as informações de algum filme?\n1 - sim\n0 - não ', 0, 1)
     if opcao == 1:
-        filmeNum = confereOpcao('\ndigite o número do filme: ', 1, cont)
+        filmeNum = confereOpcao('\nDigite o número do filme: ', 1, cont)
         procuraFilmesPadTitulo(filmesProcura[filmeNum-1].titulo)
 
 def desejaVerInfoDic(filmesProcura, cont):
-    opcao = confereOpcao('\ndeseja ver as informações de algum filme?\n1 - sim\n0 - não ', 0, 1)
+    opcao = confereOpcao('\nDeseja ver as informações de algum filme?\n1 - sim\n0 - não ', 0, 1)
     if opcao == 1:
         listaFilmes = list(filmesProcura.keys())
-        filmeNum = confereOpcao('\ndigite o número do filme: ', 1, cont)
+        filmeNum = confereOpcao('\nDigite o número do filme: ', 1, cont)
         procuraFilmesPadTitulo(listaFilmes[filmeNum-1])
 
 ### pagina inicial ###
 
 def fazLogin():
     flag = False
-    user = input('nome de usuario ')
+    user = input('\nNome de usuario ')
     for i in range(len(usuarios)):
         if usuarios[i].nomeUser == user:
             flag = True
             return usuarios[i]
     if flag == False:
-        print('\nusuario nao cadastrado, o que deseja fazer? ')
+        print('\nUsuario nao cadastrado, o que deseja fazer? ')
         return None
 
 def criaConta():
     print('\nCRIANDO CONTA\n')
-    nome = input("insira o nome: ").title()
-    nomeUser = input("insira o nome de usuario: ")
-    idade = int(input("insira a idade: "))
+    nome = input("Insira o nome: ").title()
+    nomeUser = input("Insira o nome de usuario: ")
+    idade = int(input("Insira a idade: "))
     while True:
-        sexo = input("insira o gênero (F/M): ").upper()
+        sexo = input("Insira o gênero (F/M): ").upper()
         if sexo == 'F' or sexo == 'M':
             break
         else:
             print('Opção indisponível')
     tipo = confereOpcao(
-        f"insira o tipo de usuario:\n1 - padrão\n2 - adm ", 1, 2)
+        f"Insira o tipo de usuario:\n1 - padrão\n2 - adm ", 1, 2)
     if tipo == 2:
         user = UsuarioAdm(nome, nomeUser, idade, sexo, tipo)
     else:
-        vip = confereOpcao('insira o tipo de usuário padrão:\n1 - padrão\n2 - vip ', 1, 2)
+        vip = confereOpcao('Insira o tipo de usuário padrão:\n1 - padrão\n2 - vip ', 1, 2)
         if vip == 1: 
             user = UsuarioPadrao(nome, nomeUser, idade, sexo, tipo)
         else:
@@ -127,6 +126,7 @@ def editaFilmes():
                 continue
 
 def removeFilmes():
+    flag = False
     filme = (input('\nQual filme deseja remover? ')).title()
     for i in range(len(filmes)):
         if filme == filmes[i].titulo:
@@ -139,42 +139,44 @@ def removeFilmes():
                         user.filmesAssistidos.pop(filme)
                     if filme in user.assistindoFilme:
                         user.assistindoFilme.pop(filme)
+            flag = True
             print('Filme removido com sucesso')
             return True
-    else:
+    if flag == False:
         print('Filme não contido na base de dados')
         return False
 
 def editaFilmesCat():
-    filme = input('\nInsira o nome do filme: ').title()
+    flag = False
+    filme = input('\nInsira o nome do filme: ').title().strip()
     for i in range(len(filmes)):
         if filme == filmes[i].titulo:
             filme = filmes[i]
-        else: 
-            print('Filme não contido na base de dados')
-            return False
+            flag =True
+    if flag == False: 
+        print('Filme não contido na base de dados')
+        return False
 
-        while True:
-            mudar = confereOpcao(
-                (f'Que dado deseja alterar?\n1 - título\n2 - ano de lançamento\n3 - diretor\n4 - genero\n5 - atores\n6 - duração\n7 - valor\n0 - encerrar ediçao '), 0, 7)
-            if mudar == 0:
-                return False
-            else:
-                if mudar == 1:
-                    filme.editaTitulo()  # feito
-                elif mudar == 2:
-                    filme.editaAno()  # feito
-                elif mudar == 3:
-                    filme.editaDiretor()  # feito
-                elif mudar == 4:
-                    filme.editaGenero()  # feito
-                elif mudar == 5:
-                    filme.editaAtores()  # feito
-                elif mudar == 6:
-                    filme.editaDuracao()  # feito
-                elif mudar == 7:
-                    filme.editaValor()  # feito
-    return True
+    while True:
+        mudar = confereOpcao(
+            (f'Que dado deseja alterar?\n1 - título\n2 - ano de lançamento\n3 - diretor\n4 - genero\n5 - atores\n6 - duração\n7 - valor\n0 - encerrar ediçao '), 0, 7)
+        if mudar == 0:
+            return False
+        else:
+            if mudar == 1:
+                filme.editaTitulo()  # feito
+            elif mudar == 2:
+                filme.editaAno()  # feito
+            elif mudar == 3:
+                filme.editaDiretor()  # feito
+            elif mudar == 4:
+                filme.editaGenero()  # feito
+            elif mudar == 5:
+                filme.editaAtores()  # feito
+            elif mudar == 6:
+                filme.editaDuracao()  # feito
+            elif mudar == 7:
+                filme.editaValor()  # feito
 
 def adicionaFilmes():
     print('\nADICIONANDO FILME')

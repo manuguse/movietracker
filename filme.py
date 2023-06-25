@@ -57,7 +57,7 @@ class Filme:
                 else:
                     print('Selecione dentro da faixa indicada')
             self.atores.remove(self.atores[ator-1])
-            
+
     def editaGenero(self):
         generosDisponiveis = ["Romance","Musical", "Documentário", "Ação", "Animação", "Drama", "Terror", "Fantasia", "Comédia"]
         print('GENEROS CADASTRADOS:')
@@ -70,7 +70,7 @@ class Filme:
             else:
                 print('A opção deve estar na faixa disponível')
         if opcao == 1:
-            print('gêneros disponíveis:')
+            print('Gêneros disponíveis:')
             for i in range(len(generosDisponiveis)):
                 print(f'{i+1} - {generosDisponiveis[i]}')
             while True:   
@@ -93,10 +93,10 @@ class Filme:
             self.atores.remove(self.genero[gen-1])
             
     def mostraInfos(self):
-        print(f'\n====== INFORMAÇÕES: ======')
+        print(f'\n======= INFORMAÇÕES: =======')
         print(f'TÍTULO: {self.titulo}')
         print(f'ANO DE LANÇAMENTO: {self.anoLancamento}')
-        print(f'DURAÇÃO: {self.duracao}')
+        print(f'DURAÇÃO: {self.duracao} minutos')
         print(f'GÊNERO(S):', end = ' ')
         for i in range(len(self.genero)):
             print(self.genero[i], end = '')

@@ -1,6 +1,7 @@
 from usuario import Usuario, UsuarioAdm, UsuarioPadrao, UsuarioPVIP
 from filme import Filme
-import json
+
+### funções gerais ###
 
 def confereOpcao(texto, y, z):
     while True:
@@ -11,22 +12,40 @@ def confereOpcao(texto, y, z):
             print(f"a opcão deve estar entre {y} e {z} ")
     return x
 
+def desejaVerInfo(filmesProcura, cont):
+    print(filmesProcura)
+    opcao = confereOpcao('\ndeseja ver as informações de algum filme?\n1 - sim\n0 - não ', 0, 1)
+    if opcao == 1:
+        filmeNum = confereOpcao('\ndigite o número do filme: ', 1, cont)
+        procuraFilmesPadTitulo(filmesProcura[filmeNum-1].titulo)
+
+def desejaVerInfoDic(filmesProcura, cont):
+    opcao = confereOpcao('\ndeseja ver as informações de algum filme?\n1 - sim\n0 - não ', 0, 1)
+    if opcao == 1:
+        listaFilmes = list(filmesProcura.keys())
+        filmeNum = confereOpcao('\ndigite o número do filme: ', 1, cont)
+        procuraFilmesPadTitulo(listaFilmes[filmeNum-1])
+
 ### pagina inicial ###
 
 def fazLogin():
+    flag = False
     user = input('nome de usuario ')
-    if user not in usuarios:
+    for i in range(len(usuarios)):
+        if usuarios[i].nomeUser == user:
+            flag = True
+            return usuarios[i]
+    if flag == False:
         print('\nusuario nao cadastrado, o que deseja fazer? ')
         return None
-    else:
-        return usuarios[user]
 
 def criaConta():
-    nome = input("insira o nome ").title()
-    nomeUser = input("insira o nome de usuario ")
-    idade = int(input("insira a idade "))
+    print('\nCRIANDO CONTA\n')
+    nome = input("insira o nome: ").title()
+    nomeUser = input("insira o nome de usuario: ")
+    idade = int(input("insira a idade: "))
     while True:
-        sexo = input("insira o gênero (F/M) ").upper()
+        sexo = input("insira o gênero (F/M): ").upper()
         if sexo == 'F' or sexo == 'M':
             break
         else:
@@ -38,10 +57,10 @@ def criaConta():
     else:
         vip = confereOpcao('insira o tipo de usuário padrão:\n1 - padrão\n2 - vip ', 1, 2)
         if vip == 1: 
-            user = UsuarioPadrao(nome, nomeUser, idade, sexo, tipo, 200)
+            user = UsuarioPadrao(nome, nomeUser, idade, sexo, tipo)
         else:
-            user = UsuarioPVIP(nome, nomeUser, idade, sexo, tipo, 100)
-    usuarios[user.nomeUser] = user
+            user = UsuarioPVIP(nome, nomeUser, idade, sexo, tipo)
+    usuarios.append(user)
     return user
 
 ### pagina 2 ###
@@ -50,7 +69,7 @@ def pagina2():
     while True:
         if usuarioAtivo.tipo == 2:  # adm
             opcao = confereOpcao(
-                (f'\no que deseja fazer?\n1 - editar filme(s)\n2 - procurar filme(s)\n0 - voltar '), 0, 2)
+                (f'\nO que deseja fazer?\n1 - editar filme(s)\n2 - procurar filme(s)\n0 - voltar '), 0, 2)
             if opcao == 0:
                 return False
             elif opcao == 1:
@@ -59,10 +78,10 @@ def pagina2():
                     continue
             elif opcao == 2:
                 procuraFilmesAdm()
-
+                
         else:  # padrao
             opcao = confereOpcao(
-                ('\no que deseja fazer?\n1 - procurar filme(s)\n2 - adicionar credito\n3 - ver listas\n0 - voltar '), 0, 3)
+                ('\nO que deseja fazer?\n1 - procurar filme(s)\n2 - adicionar credito\n3 - ver listas\n0 - voltar '), 0, 3)
             if opcao == 0:
                 return False
             elif opcao == 1:
@@ -71,15 +90,29 @@ def pagina2():
                     continue
             elif opcao == 2:
                 usuarioAtivo.adicionaCredito()
-            elif opcao == 3:
-                usuarioAtivo.verListas()
-
+            elif opcao == 3: # ver listas
+                while True:
+                    opcao2 = confereOpcao('\nO que deseja acessar?\n1 - filmes para assistir\n2 - filmes assistidos\n3 - filmes que está assistindo\n0 - voltar ', 0, 3)
+                    if opcao2 == 0:
+                        break
+                    if opcao2 == 1:
+                        confere = usuarioAtivo.mostraFilmesAssistir()
+                        if confere == True:
+                            desejaVerInfoDic(usuarioAtivo.filmesParaAssistir, len(usuarioAtivo.filmesParaAssistir))
+                    elif opcao2 == 2:
+                        confere = usuarioAtivo.mostraFilmesAssistidos()
+                        if confere == True:
+                            desejaVerInfoDic(usuarioAtivo.filmesAssistidos, len(usuarioAtivo.filmesAssistidos))
+                    elif opcao2 == 3:
+                        confere = usuarioAtivo.mostraFilmesAssistindo()
+                        if confere == True:
+                            desejaVerInfoDic(usuarioAtivo.assistindoFilme, len(usuarioAtivo.assistindoFilme))
 # edita filme
 
 def editaFilmes():
     while True:
         opcao = confereOpcao(
-            (f'\no que deseja fazer?\n1 - editar filmes do catálogo\n2 - adicionar filmes no catálogo\n3 - remover filmes do catálogo\n0 - voltar '), 0, 3)
+            (f'\nO que deseja fazer?\n1 - editar filmes do catálogo\n2 - adicionar filmes no catálogo\n3 - remover filmes do catálogo\n0 - voltar '), 0, 3)
         if opcao == 0:
             return False
         elif opcao == 1:
@@ -94,22 +127,31 @@ def editaFilmes():
                 continue
 
 def removeFilmes():
-    filme = (input('\nqual filme deseja remover? ')).title()
+    filme = (input('\nQual filme deseja remover? ')).title()
     for i in range(len(filmes)):
         if filme == filmes[i].titulo:
             filmes.remove(filmes[i])
+            for user in usuarios:
+                if user.tipo == 1:
+                    if filme in user.filmesParaAssistir:
+                        user.filmesParaAssistir.pop(filme)
+                    if filme in user.filmesAssistidos:
+                        user.filmesAssistidos.pop(filme)
+                    if filme in user.assistindoFilme:
+                        user.assistindoFilme.pop(filme)
+            print('Filme removido com sucesso')
             return True
     else:
-        print('o filme não está contido na base de dados')
+        print('Filme não contido na base de dados')
         return False
 
 def editaFilmesCat():
-    filme = input('\ninsira o nome do filme: ').title()
+    filme = input('\nInsira o nome do filme: ').title()
     for i in range(len(filmes)):
         if filme == filmes[i].titulo:
             filme = filmes[i]
         else: 
-            print('o filme não está contido na base de dados')
+            print('Filme não contido na base de dados')
             return False
 
         while True:
@@ -136,27 +178,27 @@ def editaFilmesCat():
 
 def adicionaFilmes():
     print('\nADICIONANDO FILME')
-    titulo = input('título: ').title()
-    anoLancamento = int(input('ano de lançamento: '))
-    diretor = input('diretor: ').title()
+    titulo = input('Título: ').title().strip()
+    anoLancamento = int(input('Ano de lançamento: '))
+    diretor = input('Diretor: ').title()
     while True: # duracao
-        duracao = int(input('duração: '))
+        duracao = int(input('Duração: '))
         if duracao > 0:
             break
         else:
-            print('a duração deve ser maior que 0')
+            print('A duração deve ser maior que 0')
     while True: # valor
-        valor = float(input('valor: '))
+        valor = float(input('Valor: '))
         if valor > 0:
             break
         else:
-            print('o valor deve ser maior que 0')
+            print('O valor deve ser maior que 0')
     atores = []
     while True: # atores
-        ator = input('ator: ').title()
+        ator = input('Ator: ').title()
         atores.append(ator)
         while True:
-            opcao = input('deseja continuar adicionando atores? (S/N) ').upper()
+            opcao = input('Deseja continuar adicionando atores? (S/N) ').upper()
             if opcao == 'N' or opcao == 'S':
                 break
         if opcao == 'N':
@@ -174,121 +216,173 @@ def adicionaFilmes():
         while True:
             genero = int(input())
             if genero >= numGeneros+1 or genero < 1:
-                print('numero invalido')
-                print('gênero:', end = ' ')
+                print('Numero invalido')
+                print('Gênero:', end = ' ')
                 continue
             elif 1 <= genero <= numGeneros and generosDisponiveis[genero-1] not in generos:
                 generos.append(generosDisponiveis[genero-1])
                 break
             elif generosDisponiveis[genero-1] in generos:
-                print('genero já adicionado')
-                print('gênero:', end = ' ')
+                print('Gênero já adicionado')
+                print('Gênero:', end = ' ')
                 
         while True:
-            opcao = input('deseja continuar adicionando gêneros? (S/N) ').upper()
+            opcao = input('Deseja continuar adicionando gêneros? (S/N) ').upper()
             if opcao == 'N' or opcao == 'S':
                 break
         if opcao == 'N':
             break
         else:
-            print('gênero:', end = ' ')
+            print('Gênero:', end = ' ')
 
     filme = (Filme(titulo, anoLancamento, diretor, atores, duracao, generos, valor))
     filmes.append(filme)
-    print('filme adicionado com sucesso')
+    print('Filme adicionado com sucesso')
     return False
 
 # procura filme
 
 def procuraFilmesAdm():
-    filme = input('digite o filme de busca: ').title()
+    filme = input('\nDigite o título do filme de busca: ').title().strip()
+    flag = False
     for i in range(len(filmes)):
         if filme == filmes[i].titulo:
             filme = filmes[i]
+            flag = True
             break
-        else: 
-            print('o filme não está contido na base de dados')
-            return False
+    if flag == False: 
+        print('Filme não contido na base de dados')
+        return False
     filme.mostraInfos()
     return True
 
 def procuraFilmesPad():
-    opcao = confereOpcao('\ndeseja procurar por que categoria?\n1 - título\n2 - ator\n3 - década\n4 - gênero\n0 - voltar ', 0, 4)
-    if opcao == 1:
-        procuraFilmesPadTitulo()
-
-def procuraFilmesPadTitulo():
-    statusTrue = '✔'
-    statusFalse = '✖'
-    filme = input('digite o filme de busca: ').title()
-    for i in range(len(filmes)):
-        if filme == filmes[i].titulo:
-            filme = filmes[i]
-            break
-        else: 
-            print('o filme não está contido na base de dados')
-            return False
-    filme.mostraInfos()
-
-    if filme in usuarioAtivo.filmesAssistidos:
-        assistido = statusTrue
-    else:
-        assistido = statusFalse
-
-    if filme in usuarioAtivo.filmesParaAssistir:
-        lista = statusTrue
-        opcoesLista = 'remover filme da lista'
-        acaoLista = usuarioAtivo.removeLista
-    else:
-        lista = statusFalse
-        opcoesLista = 'adicionar filme à lista'
-        acaoLista = usuarioAtivo.adicionaLista
-
-    if filme in usuarioAtivo.assistindoFilme:
-        asistindo = statusTrue
-        opcoesFilme = 'terminar filme'
-        acaoFilme = usuarioAtivo.terminaFilme
-    else:
-        asistindo = statusFalse
-        opcoesFilme = 'comecar filme'
-        acaoFilme = usuarioAtivo.comecaFilme
-
-    print()
-    print(f'assistindo: {asistindo}')
-    print(f'assistidos: {assistido}')
-    print(f'minha lista: {lista}')
-
-    opcao = confereOpcao((f'o que deseja fazer?\n1 - {opcoesFilme}\n2 - {opcoesLista}\n0 - voltar '), 0, 2)
-    if opcao == 0:
+    while True:
+        opcao = confereOpcao('\nDeseja procurar por que categoria?\n1 - título\n2 - ator\n3 - década\n4 - gênero\n5 - todos os filmes\n0 - voltar ', 0, 5)
+        if opcao == 0:
+            return True
+        if opcao == 1:
+            confere = procuraFilmesPadTitulo(input('\nDigite o tĩtulo do filme de busca: ').title().strip())
+            if confere == False:
+                continue
+        elif opcao == 2:
+            confere = procuraFilmesPadAtor()
+            if confere == False:
+                continue
+        elif opcao == 3:
+            confere = procuraFilmesPadDecada()
+            if confere == False:
+                continue
+        elif opcao == 4:
+            confere = procuraFilmesPadGenero()
+            if confere == False:
+                continue
+        elif opcao == 5:
+            confere = procuraFilmesPadTodos()
+            if confere == False:
+                continue
         return False
-    if opcao == 1:
-        valor = filme.valor
-        acaoFilme(filme, filme.titulo, valor)
-    elif opcao == 2:
-        acaoLista(filme, filme.titulo)
+
+def procuraFilmesPadTitulo(titulo):
+    flag = False
+    for movie in filmes:
+        if titulo == movie.titulo:
+            filme = movie
+            flag = True
+            break
+    if flag == False:
+        print('Filme não contido na base de dados')
+        return False
+    filme.mostraInfos()
+    usuarioAtivo.opcoesBuscaMostra(filme, filme.titulo, filme.valor)
     return True
+
+def procuraFilmesPadAtor():
+    flag = False
+    filmesProcura = []
+    ator = input("\nDigite o nome do ator: ").title().strip()
+    print(f'\nFILMES COM {ator.upper()}:')
+    cont = 0
+    for i in range (len(filmes)):
+        if ator in filmes[i].atores:
+            cont += 1
+            print(f'{cont} - {filmes[i].titulo}')
+            filmesProcura.append(filmes[i])
+            flag = True
+    if flag == False:
+        print('Nenhum filme encontrado')
+        return True
+    desejaVerInfo(filmesProcura, cont)
+    return True
+
+def procuraFilmesPadDecada():
+    filmesProcura = []
+    flag = False
+    decada = confereOpcao('\nDigite a década: ', 1900, 2020)
+    decadaInput = (decada//10)*10
+    print(f'\nFILME(S) DA DÉCADA DE {decada}:')
+    cont = 0
+    for i in range (len(filmes)):
+        decadaFilme = (filmes[i].anoLancamento//10)*10
+        if decadaInput == decadaFilme:
+            cont += 1
+            print(f'{cont} - {filmes[i].titulo}')
+            filmesProcura.append(filmes[i])
+            flag = True
+    if flag == False:
+        print('Nenhum filme encontrado')
+        return False
+    desejaVerInfo(filmesProcura, cont)
+    return True
+
+def procuraFilmesPadGenero():
+    filmesProcura = []
+    flag = False
+    genero = input('\nDigite o gênero: ').title()
+    print(f'\nFILMES DO GÊNERO {genero.upper()}:')
+    cont = 0
+    for filme in filmes:
+        if genero in filme.genero:
+            cont += 1
+            print(f'{cont} - {filme.titulo}')
+            filmesProcura.append(filme)
+            flag = True
+    if flag == False:
+        print('Nenhum filme encontrado')
+        return False
+    desejaVerInfo(filmesProcura, cont)
+    return True
+
+def procuraFilmesPadTodos():
+    print('\nTODOS OS FILMES:')
+    cont = 0
+    for filme in filmes:
+        cont += 1
+        print(f'{cont} - {filme.titulo}')
+    desejaVerInfo(filmes, cont)
 
 ### main ###
 
-usuarios = {
-    'mariahh': UsuarioAdm('maria', 'mariahh', 18, 'F', 2),
-    'joaozinho': UsuarioPadrao('joao', 'joaozinho', 23, 'M', 1, 100),
-    'manug': UsuarioPVIP('emanuelle', 'manug', 19, 'F', 1, 200)
-}
-filmes = (
+usuarios = [
+    UsuarioAdm('maria', 'mariahh', 18, 'F', 2),
+    UsuarioPadrao('joao', 'joaozinho', 23, 'M', 1),
+    UsuarioPVIP('emanuelle', 'manug', 19, 'F', 1)
+]
+filmes = [
     Filme('Clueless', 1995, 'Amy Heckerling', ['Paul Rudd', 'Alicia Silverstone'], 97, ['Comédia'], 20),
-    Filme('Orgulho e Preconceito', 2006, 'Joe Wright', ['Keira Knightley', 'Matthew Macfadyen'], 127, ['Romance'], 15),
+    Filme('Orgulho E Preconceito', 2006, 'Joe Wright', ['Keira Knightley', 'Matthew Macfadyen'], 127, ['Romance'], 15),
     Filme('Miss Americana', 2020, 'Lana Wilson', ['Taylor Swift'], 85, ['Documentário', 'Musical'], 17),
     Filme('Forest Gump', 1994, 'Robert Zemeckis', ['Tom Hanks', 'Robin Wright'], 142, ['Comédia', 'Drama'], 15)
-)
+]
 
-print("MOVIE TRACKER, o que deseja fazer?")
+print("Bem vindo ao movie tracker, o que deseja fazer?")
 flag = True
 while flag == True:
     while True:
         opcao = confereOpcao(
             "\n1 - fazer login com conta existente\n2 - criar uma nova conta\n0 - encerrar programa ", 0, 2)
         if opcao == 0:
+            print("Até a proxima!")
             flag = False
             break
         if opcao == 1:

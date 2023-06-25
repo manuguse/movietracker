@@ -1,3 +1,4 @@
+from filme import Filme
 class Usuario:
 
     def __init__(self, nome, nomeUser, idade, sexo, tipo):
@@ -9,9 +10,9 @@ class Usuario:
 
     def mensagemBoasVindas(self):
         if self.sexo == 'F':
-            mensagem = (f'\nBem vinda, {(self.nome).title()}')
+            mensagem = (f'\nBem vinda, {(self.nome).title()}!')
         else:
-            mensagem = (f'\nBem vindo, {(self.nome).title()}')
+            mensagem = (f'\nBem vindo, {(self.nome).title()}!')
         return mensagem
 
 
@@ -22,12 +23,13 @@ class UsuarioAdm(Usuario):
 
 
 class UsuarioPadrao(Usuario):
-    def __init__(self, nome, nomeUser, idade, sexo, tipo, creditoInicial):
+    def __init__(self, nome, nomeUser, idade, sexo, tipo, filmesAssistidos = {}, filmesParaAssistir = {}, assistindoFilme = {}):
         super().__init__(nome, nomeUser, idade, sexo, tipo)
-        self.credito = creditoInicial
-        self.filmesParaAssistir = {}
-        self.filmesAssistidos = {}
-        self.assistindoFilme = {}
+        self.credito = 30
+        self.limiteFilme = 5
+        self.filmesParaAssistir = filmesParaAssistir
+        self.filmesAssistidos = filmesAssistidos
+        self.assistindoFilme = assistindoFilme
 
     def adicionaCredito(self):
         valor = int(input('Quanto deseja inserir? '))
@@ -36,93 +38,147 @@ class UsuarioPadrao(Usuario):
 
     def removeLista(self, filme, titulo):
         self.filmesParaAssistir.pop(titulo)
-        print('filme removido da lista')
+        print('Filme removido da lista com sucesso')
 
     def adicionaLista(self, filme, titulo):
         limiteLista = 20
         if len(self.filmesParaAssistir)+1 <= limiteLista: 
             self.filmesParaAssistir[titulo] = filme
-            print('filme adicionado à lista')
-            print(f'capacidade da lista: {len(self.filmesParaAssistir)}/{limiteLista}')
+            print('\nFilme adicionado à lista com sucesso')
+            print(f'Capacidade da lista: {len(self.filmesParaAssistir)}/{limiteLista}')
         else:
-            print('a lista está em seu limite, esvazie para adicionar')
+            print('A lista está em seu limite, esvazie para adicionar')
     
     def terminaFilme(self, filme, titulo, valor):
         self.filmesAssistidos[titulo] = filme
         self.assistindoFilme.pop(titulo)
         self.credito += valor/2
-        print(f'filme terminado, crédito total: {self.credito:.2f}')
+        print(f'Filme terminado, crédito total: {self.credito:.2f}')
     
     def comecaFilme(self, filme, titulo, valor):
         limiteFilme = 5
         if self.credito - valor > 0:
             if len(self.assistindoFilme) > limiteFilme:
-                print(f'você já chegou no limite de filmes assistidos de uma vez')
+                print(f'Você já chegou no limite de filmes assistidos de uma vez')
             else:
                 self.credito -= valor
                 self.assistindoFilme[titulo] = filme
-                print(f'tenha um bom filme!\ncrédito total: {self.credito:.2f}')
+                print(f'Tenha um bom filme!\ncrédito total: {self.credito:.2f}')
         else:
-            print(f'saldo insuficiente, crédito total: {self.credito:.2f}')
+            print(f'Saldo insuficiente, crédito total: {self.credito:.2f}')
+            opcao = int(input('Deseja adicionar crédito?\n1 - sim\n2 - não '))
+            while opcao != 1 and opcao != 2:
+                opcao = int(input('Opção inválida, digite novamente'))
+            if opcao == 1:
+                self.adicionaCredito()
+                opcao = int(input('Deseja começar o filme?\n1 - sim\n2 - não '))
+                while opcao != 1 and opcao != 2:
+                    opcao = int(input('Opção inválida, digite novamente'))
+                if opcao == 1:
+                    self.comecaFilme(filme, titulo, valor)
 
-    def verListas(self):
-        while True:
-            opcao = int(input('\nO que deseja acessar?\n1 - Filmes para assistir\n2 - Filmes assistidos\n3 - Filmes assistindo\n'))
-            if 0 <= opcao <= 3:
-                break
-        if opcao == 1:
-            self.mostraFilmesAssistir()
-        elif opcao == 2:
-            self.mostraFilmesAssistidos()
-        elif opcao == 3:
-            self.mostraFilmesAssistindo()
+
             
     def mostraFilmesAssistir(self):
-        print('Filmes para assistir:')
+        print('\nFilmes para assistir:')
         if len(self.filmesParaAssistir) == 0:    
-            print('lista vazia')
+            print('Lista vazia')
+            return False
         else:
-            for i in range(len(self.filmesParaAssistir)):
-                print(f'{i+1} - {self.filmesParaAssistir[i]}')
+            cont = 1
+            for i in self.filmesParaAssistir:
+                print(f'{cont} - {i}')
+                cont += 1
+            return True
     
     def mostraFilmesAssistidos(self):
-        print('Filmes assistidos:')
+        print('\nFilmes assistidos:')
         if len(self.filmesAssistidos) == 0:
-            print('lista vazia')
+            print('Lista vazia')
+            return False
         else:
-            for i in range(len(self.filmesAssistidos)):
-                print(f'{i+1} - {self.filmesAssistidos[i]}')
+            cont = 1
+            for i in self.filmesAssistidos:
+                print(f'{cont} - {i}')
+                cont += 1
+            return True
             
     def mostraFilmesAssistindo(self):
-        print('Filmes assistindo:')
+        print('\nFilmes que está assistindo:')
         if len(self.assistindoFilme) == 0:
-            print('lista vazia')
+            print('Lista vazia')
+            return False
         else:
-            for i in range(len(self.assistindoFilme)):
-                print(f'{i+1} - {self.assistindoFilme[i]}')
+            cont = 1
+            for i in self.assistindoFilme:
+                print(f"{cont} - {i}")
+                cont += 1
+            return True
+
+    def opcoesBuscaMostra(self, filme, titulo, valor): 
+        statusTrue = '✔'
+        statusFalse = '✖'
+        if titulo in self.filmesAssistidos:
+            assistido = statusTrue
+        else:
+            assistido = statusFalse
+
+        if titulo in self.filmesParaAssistir:
+            lista = statusTrue
+            opcoesLista = 'remover filme da lista'
+            acaoLista = self.removeLista
+        else:
+            lista = statusFalse
+            opcoesLista = 'adicionar filme à lista'
+            acaoLista = self.adicionaLista
+
+        if titulo in self.assistindoFilme:
+            asistindo = statusTrue
+            opcoesFilme = 'terminar filme'
+            acaoFilme = self.terminaFilme
+        else:
+            asistindo = statusFalse
+            opcoesFilme = 'comecar filme'
+            acaoFilme = self.comecaFilme
+
+        print()
+        print(f'assistindo: {asistindo}')
+        print(f'assistidos: {assistido}')
+        print(f'minha lista: {lista}')
+
+        while True:
+            opcao = int(input(f'\nO que deseja fazer?\n1 - {opcoesFilme}\n2 - {opcoesLista}\n0 - voltar '))
+            if 0 <= opcao <= 2:
+                break
+            else:
+                print('Opção inválida')
+        if opcao == 0:
+            return False
+        if opcao == 1:
+            acaoFilme(filme, titulo, valor)
+        elif opcao == 2:
+            acaoLista(filme, titulo)
 
 class UsuarioPVIP(UsuarioPadrao):
-    def __init__(self, nome, nomeUser, idade, sexo, tipo, creditoInicial):
-        super().__init__(nome, nomeUser, idade, sexo, tipo, creditoInicial)
-        self.credito = creditoInicial
-        self.filmesAssistidos = {}
-        self.filmesParaAssistir = {}
-        self.assistindoFilme = {}
+    def __init__(self, nome, nomeUser, idade, sexo, tipo):
+        super().__init__(nome, nomeUser, idade, sexo, tipo, filmesAssistidos = {}, filmesParaAssistir = {}, assistindoFilme = {})
+        self.credito = 50
 
     def adicionaLista(self, filme, titulo):
-        self.filmesAssistidos[titulo] = filme
-        print('filme adicionado à lista')
+        self.filmesParaAssistir[titulo] = filme
+        print('\nFilme adicionado à lista com sucesso')
     
     def comecaFilme(self, filme, titulo, valor):
         if self.credito - valor > 0:
             self.credito -= valor
             self.assistindoFilme[titulo] = filme
-            print(f'tenha um bom filme!\ncrédito total: {self.credito:.2f}')
+            print(f'Tenha um bom filme!\ncrédito total: {self.credito:.2f}')
+
         else:
-            print(f'saldo insuficiente, crédito total: {self.credito:.2f}')
+            print(f'Saldo insuficiente, crédito total: {self.credito:.2f}')
             
     def terminaFilme(self, filme, titulo, valor):
         self.filmesAssistidos[titulo] = filme
         self.assistindoFilme.pop(titulo)
         self.credito += valor*0.75
-        print(f'filme terminado, crédito total: {self.credito:.2f}')
+        print(f'Filme terminado, crédito total: {self.credito:.2f}')
